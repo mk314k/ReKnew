@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from reknew.demo import DemoRoomCamera, ensure_sample_memories
 from reknew.images import load_memory_image
 from reknew.light import linear_to_srgb
 from reknew.paths import MEMORIES_DIR, SCENES_DIR
@@ -57,13 +58,20 @@ def describe_calibration(result: CalibrationResult, true_gain: float | None) -> 
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, camera_index: int = 0):
+    def __init__(self, camera_index: int = 0, demo: bool = False):
         super().__init__()
         self.setWindowTitle("ReKnew - Projection Memory Overlay")
 
-        self.camera = cv2.VideoCapture(camera_index)
-        if not self.camera.isOpened():
-            raise IOError("Cannot open webcam")
+        ensure_sample_memories(MEMORIES_DIR)
+        if demo:
+            self.camera = DemoRoomCamera()
+        else:
+            cam = cv2.VideoCapture(camera_index)
+            if cam.isOpened():
+                self.camera = cam
+            else:
+                cam.release()
+                self.camera = DemoRoomCamera()
 
         self.session = ProjectionSession(SimulatedProjector())
         self.corners: list[tuple[int, int]] = []
@@ -422,7 +430,14 @@ class MainWindow(QMainWindow):
 
 
 def run():
-    app = QApplication(sys.argv)
-    window = MainWindow()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="ReKnew - Projection Memory Overlay")
+    parser.add_argument("--demo", action="store_true", help="Use built-in synthetic demo room instead of a webcam")
+    parser.add_argument("--camera", type=int, default=0, help="Webcam device index (default: 0)")
+    args, qt_args = parser.parse_known_args()
+
+    app = QApplication([sys.argv[0], *qt_args])
+    window = MainWindow(camera_index=args.camera, demo=args.demo)
     window.show()
     sys.exit(app.exec())

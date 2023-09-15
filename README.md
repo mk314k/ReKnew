@@ -13,10 +13,10 @@ light washes it out. The same code drives a real projector connected as a second
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e .
-reknew  # or: python -m reknew
+reknew  # or: python -m reknew (use `reknew --demo` for the built-in synthetic room)
 ```
 
-Put your memory photos in `memories/` (it stays out of git) or add them with `Import Memories`.
+Put your memory photos in `memories/` (it stays out of git; 3 sample memories are generated automatically on first run if `memories/` is empty) or add them with `Import Memories`. If no webcam is connected, ReKnew automatically falls back to a built-in synthetic room so you can test surface selection, radiometric compensation, and calibration immediately.
 
 Run the tests with `pip install -e ".[dev]" && pytest`.
 
@@ -34,6 +34,7 @@ On Ubuntu desktop, Qt also needs `sudo apt install libxcb-cursor0`.
 | `reknew/scene.py` | `Overlay`, `RoomFeatures` (recognizing the room again), scene files |
 | `reknew/session.py` | `ProjectionSession`: all per-frame state and logic, no UI |
 | `reknew/surface_detection.py` | Auto-suggested quads |
+| `reknew/demo.py` | Synthetic demo room camera and sample memory generator |
 | `reknew/ui/` | Qt window, widgets and the real-projector (`ScreenProjector`) output |
 
 ## How to use
